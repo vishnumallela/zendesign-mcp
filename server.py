@@ -2,7 +2,7 @@ import asyncio
 import requests
 from fastmcp import FastMCP
 from typing import Dict, Any
-
+import json
 mcp = FastMCP("Oraczen-Zendesign-MCP")
 
 
@@ -52,7 +52,7 @@ def get_component_info(component_name: str) -> Dict[str, Any]:
 @mcp.tool
 def get_llms_text() -> Dict[str, str]:
     """
-    Get the llms.txt content from Zendesign for full design system context.
+    Get the llms.txt content from Zendesign for full design system context.this includes overall design system context, component information, and other relevant information.
     
     Returns:
         Dict containing the llms.txt content and metadata
@@ -84,7 +84,62 @@ def get_llms_text() -> Dict[str, str]:
             "content": "",
             "status": "error"
         }
+    
 
-
+@mcp.tool
+def get_avaialble_components() -> Dict[str, str]:
+    """
+    this will give you the list of all components that are avaialble in the design system
+    """
+    try:
+        url = "https://zendesign-psi.vercel.app/r/registry.json"
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        components = [item["name"] for item in data["items"]]
+        return {
+            "components": components,
+            "status": "success",
+        }
+    except requests.exceptions.RequestException as e:
+        return {
+            "error": f"Failed to fetch components: {str(e)}",
+            "status": "error"
+        }
+    except Exception as e:
+        return {
+            "error": f"Error processing components: {str(e)}",
+            "components": [],
+            "status": "error"
+        }
+    
+@mcp.tool
+def get_component_code(component_name: str) -> Dict[str, str]:
+    """returns the content code of the component.this includes the component code, the component css, and the component js"""
+    try:
+        url = f"https://zendesign-psi.vercel.app/r/e/{component_name}.json"
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        files_content = {}
+        for file in data["files"]:
+            files_content[file["name"]] = file["content"]
+        return {
+            "content": json.dumps(files_content,indent=4),
+            "status": "success",
+        }
+    except requests.exceptions.RequestException as e:
+        return {
+            "error": f"Failed to fetch component code: {str(e)}",
+            "status": "error"
+        }
+    except Exception as e:
+        return {
+            "error": f"Error processing component code: {str(e)}",
+            "status": "error"
+        }
+    
+    
+    
 if __name__ == "__main__":
     mcp.run(transport="sse",port=9000)
