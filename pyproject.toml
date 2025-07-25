@@ -1,0 +1,13 @@
+[project]
+name = "zd-mcp"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=0.59.0",
+    "fastmcp>=2.10.6",
+    "requests>=2.31.0",
+    "rich>=13.0.0",
+    "python-dotenv>=1.0.0",
+]
