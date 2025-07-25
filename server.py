@@ -3,6 +3,7 @@ import requests
 from fastmcp import FastMCP
 from typing import Dict, Any
 import json
+import os
 mcp = FastMCP("Oraczen-Zendesign-MCP")
 
 
@@ -142,4 +143,5 @@ def get_component_code(component_name: str) -> Dict[str, str]:
     
     
 if __name__ == "__main__":
-    mcp.run(transport="sse",port=9000)
+    port = int(os.getenv("PORT", 9000))
+    mcp.run(transport="sse", port=port)
